@@ -160,6 +160,19 @@ class _MyHomePageState extends State<MyHomePage> {
           // ],
           ),
       // This trailing comma makes auto-formatting nicer for build methods.
+      // ignore: prefer_const_literals_to_create_immutables
+      bottomNavigationBar: BottomNavigationBar(iconSize: 30, items: [
+        const BottomNavigationBarItem(
+            label: 'Search',
+            icon: Icon(Icons.search),
+            backgroundColor: Colors.red),
+        const BottomNavigationBarItem(
+            label: 'Home', icon: Icon(Icons.home), backgroundColor: Colors.red),
+        const BottomNavigationBarItem(
+            label: 'Calculator',
+            icon: Icon(Icons.calculate),
+            backgroundColor: Colors.red),
+      ]),
     );
   }
 }
