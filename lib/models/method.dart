@@ -11,7 +11,17 @@ class Method {
   });
 
   factory Method.fromJson(Map<String, dynamic> json) {
-    return Method(method_id: int.parse(json['method_id']), name: json['name']);
+    var method_id;
+    try {
+      method_id = int.parse(json['method_id']);
+    } catch (e) {
+      method_id = null;
+    }
+
+    return Method(
+        method_id: method_id,
+        name: json['name']
+    );
   }
 
   Map<String, dynamic> toJson() {

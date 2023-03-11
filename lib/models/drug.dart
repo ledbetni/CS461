@@ -3,7 +3,7 @@ import 'package:vet_app/assets/constants.dart' as constants;
 class Drug {
   static const String URL = '${constants.TLD}/drugs';
 
-  final int drug_id;
+  final int? drug_id;
   final String name;
 
   Drug({
@@ -12,8 +12,15 @@ class Drug {
   });
 
   factory Drug.fromJson(Map<String, dynamic> json) {
+    var drug_id;
+    try {
+      drug_id = int.parse(json['drug_id']);
+    } catch (e) {
+      drug_id = null;
+    }
+
     return Drug(
-        drug_id: int.parse(json['drug_id']),
+        drug_id: drug_id,
         name: json['name']
     );
   }
