@@ -3,21 +3,19 @@ library vet_app;
 export 'models/animal.dart';
 export 'models/drug.dart';
 export 'models/concentration.dart';
-export 'models/concentration_list.dart';
 export 'models/dosage.dart';
-export 'models/dosage_list.dart';
 export 'models/method.dart';
-export 'models/method_list.dart';
-export 'models/network_data.dart';
 export 'models/delivery.dart';
-export 'models/delivery_list.dart';
 export 'models/unit.dart';
-export 'models/unit_list.dart';
+export 'models/network_data.dart';
+
 export 'components/tab_controller.dart';
 export 'components/animal_dropdown.dart';
 export 'components/drug_dropdown.dart';
+
 export 'screens/animal_details_screen.dart';
 export 'screens/animal_screen.dart';
 export 'screens/drugs_screen.dart';
 export 'screens/calculator_screen.dart';
+
 export 'app.dart';

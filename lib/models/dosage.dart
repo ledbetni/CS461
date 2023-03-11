@@ -1,4 +1,8 @@
+import 'package:vet_app/assets/constants.dart' as constants;
+
 class Dosage {
+  static const String URL = '${constants.TLD}/dosages';
+
   final int dosage_id;
   final int animal_id;
   final int drug_id;
@@ -25,5 +29,17 @@ class Dosage {
         dose_high: json['dose_high'].toDouble(),
         dose_unit_id: int.parse(json['dose_unit_id']),
         notes: json['notes']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'dosage_id': dosage_id,
+      'animal_id': animal_id,
+      'drug_id': drug_id,
+      'dose_low': dose_low,
+      'dose_high': dose_high,
+      'dose_unit_id': dose_unit_id,
+      'notes': notes,
+    };
   }
 }
