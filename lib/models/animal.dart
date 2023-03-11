@@ -25,7 +25,7 @@ class Animal{
   factory Animal.fromJson(Map<String, dynamic> json) {
     var animal_id;
     try {
-      animal_id = int.parse(json['dosage_id']);
+      animal_id = int.parse(json['animal_id']);
     } catch (e) {
       animal_id = null;
     }

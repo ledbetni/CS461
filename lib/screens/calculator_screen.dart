@@ -8,14 +8,9 @@ import 'animal_details_screen.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 
+
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
-
-  static const String concentrationURL = 'https://vaddb.liamgombart.com/concentrations';
-  static const String deliveryURL = 'https://vaddb.liamgombart.com/delivery';
-  static const String dosageURL = 'https://vaddb.liamgombart.com/dosages';
-  static const String methodURL = 'https://vaddb.liamgombart.com/methods';
-  static const String unitURL = 'https://vaddb.liamgombart.com/units';
 
   @override
   State<CalculatorScreen> createState() => _CalculatorScreenState();
@@ -27,28 +22,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   var animals = <Animal>[];
   var drugs = <Drug> [];
 
+  dynamic calculatedDosages = '';
+  Animal? selectedAnimal;
+  Drug? selectedDrug;
+  List<Dosage> filteredDosages = [];
 
-  List<Concentration> concentrations = [];
-  var concentrationList = ConcentrationList(entries: []);
+  int? animalWeight;
 
-  List<Delivery> deliveries = [];
-  var deliveryList = DeliveryList(entries: []);
+  double? calculatorValueHigh;
+  double? calculatorValueLow;
+  String? answerString = 'Answer will appear here';
 
-  List<Dosage> dosages = [];
-  var dosageList = DosageList(entries: []);
-
-  List<Method> methods = [];
-  var methodList = MethodList(entries: []);
-
-  List<Unit> units = [];
-  var unitList = UnitList(entries: []);
 
   @override
   void initState() {
     super.initState();
     getAnimals();
     getDrugs();
-    retrieveDosageData();
   }
 
   @override
@@ -72,90 +62,131 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     setState(() { drugs = data; });
   }
 
-
-  void retrieveConcentrationData() async {
-    final http.Response apiResponse =
-        await http.get(Uri.parse(CalculatorScreen.concentrationURL));
-    concentrationList =
-        ConcentrationList.fromJson(jsonDecode(apiResponse.body));
-    setState(() {});
+  void animalWeightHandler(newValue) {
+    setState(() { animalWeight = int.parse(newValue); });
   }
 
-  // void retrieveDeliveryData() async {
-  //   final http.Response apiResponse =
-  //       await http.get(Uri.parse(CalculatorScreen.deliveryURL));
-  //   deliveryList = DeliveryList.fromJson(jsonDecode(apiResponse.body));
-  //   setState(() {});
-  // }
-
-  void retrieveDosageData() async {
-    final http.Response apiResponse =
-        await http.get(Uri.parse(CalculatorScreen.dosageURL));
-    dosageList = DosageList.fromJson(jsonDecode(apiResponse.body));
-    setState(() {});
+  void animalDropDownHandler(newValue) {
+    setState(() { selectedAnimal = newValue; });
   }
 
-  // void retrieveMethodData() async {
-  //   final http.Response apiResponse = await http.get(Uri.parse(DrugScreen.URL));
-  //   methodList = MethodList.fromJson(jsonDecode(apiResponse.body));
-  //   setState(() {});
-  // }
-
-  // void retrieveUnitData() async {
-  //   final http.Response apiResponse = await http.get(Uri.parse(DrugScreen.URL));
-  //   unitList = UnitList.fromJson(jsonDecode(apiResponse.body));
-  //   setState(() {});
-  // }
-
-  int getAnimalDrop() {
-    Animal getAnimal;
-    getAnimal = animalDropValue!;
-    return getAnimal.animal_id;
+  void drugDropDownHandler(newValue) {
+    setState(() { selectedDrug = newValue; });
   }
 
-  int getDrugDrop() {
-    Drug getDrug;
-    getDrug = drugDropValue!;
-    return getDrug.drug_id;
+  void getFilteredDosages() async {
+    var animal_id = selectedAnimal?.animal_id ?? null;
+    var drug_id = selectedDrug?.drug_id ?? null;
+    var data = await NetworkData().makeList<Dosage>('${Dosage.URL}?animal_id=$animal_id&drug_id=$drug_id', Dosage.fromJson);
+    for (var dosage in data) {
+      var dose_unit_name = await getUnitName(dosage.dose_unit_id);
+      dosage.dose_unit_name = dose_unit_name;
+    }
+    setState(() { filteredDosages = data; });
   }
 
-  void getDosageAnimalDrug() async {
-    String animalID = animalDropValue!.animal_id.toString();
-    String drugID = drugDropValue!.drug_id.toString();
-    String dosageIDURL =
-        "https://vaddb.liamgombart.com/dosages?animal_id=$animalID&drug_id=$drugID";
+  Future<dynamic> getAssociatedConcentrations(Dosage dosage) async {
+    var collectedConcentrations = <Concentration>[];
 
-    final http.Response apiResponse = await http.get(Uri.parse(dosageIDURL));
-    dosageList = DosageList.fromJson(jsonDecode(apiResponse.body));
+    var dosage_id = dosage?.dosage_id ?? null;
+    var data = await NetworkData().makeList<Concentration>(
+        '${Concentration.URL}?dosage_id=$dosage_id', Concentration.fromJson);
+
+    for (var concentration in data) {
+      var unit_name = await getUnitName(concentration.unit_id);
+      concentration.unit_name = unit_name;
+      collectedConcentrations.add(concentration);
+    }
+    return collectedConcentrations;
+  }
+
+  Future<dynamic> getAssociatedMethods(Dosage dosage) async {
+    var collectedMethods = <Method>[];
+
+    var dosage_id = dosage?.dosage_id ?? null;
+    var data = await NetworkData().makeList<Delivery>('${Delivery.URL}?dosage_id=$dosage_id', Delivery.fromJson);
+
+    for (var delivery in data) {
+      var method = await getMethod(delivery.method_id);
+      collectedMethods.add(method.first);
+    }
+    return collectedMethods;
+  }
+
+  Future<dynamic> getUnitName(int unit_id) async {
+    var unit = await NetworkData().makeList<Unit>('${Unit.URL}/$unit_id', Unit.fromJson);
+    return unit.first.name;
+  }
+
+  Future<dynamic> getMethod(int method_id) async {
+    var method = await NetworkData().makeList<Method>('${Method.URL}/$method_id', Method.fromJson);
+    return method;
+  }
+
+  void dereferenceDosages() async {
+    try {
+      getFilteredDosages();
+      for (var item in filteredDosages) {
+        item.methods = await getAssociatedMethods(item);
+        item.concentrations = await getAssociatedConcentrations(item);
+        print(jsonEncode(item));
+      }
+
+    } catch (e) {
+      print('$e');
+    }
+  }
+
+  void calculateDosage() async {
+
+    dereferenceDosages();
+
+    // TODO HERE vvvvvvvvvvvv
+    //
+    // do some calculations  herewith the dereferenced dosages
+    //
+    // TODO HERE ^^^^^^^^^
+
+    setState(() { calculatedDosages = 'clicked'; });
+  }
+
+
+
+  //void getDosageAnimalDrug() async {
+  //  String animalID = selectedAnimal!.animal_id.toString();
+  //  String drugID = selectedDrug!.drug_id.toString();
+  //  String dosageIDURL =
+  //      "https://vaddb.liamgombart.com/dosages?animal_id=$animalID&drug_id=$drugID";
+
+  //  final http.Response apiResponse = await http.get(Uri.parse(dosageIDURL));
+ //   dosageList = DosageList.fromJson(jsonDecode(apiResponse.body));
     // print(jsonDecode(animalID));
     // print(jsonDecode(drugID));
-    print(dosageList.entries);
+  //  print(dosageList.entries);
     //return dosageList;
-  }
+  //}
 
-  void getUnitURL(int dosageUnitID) async {
-    String unitURL = "https://vaddb.liamgombart.com/units/$dosageUnitID";
-    final http.Response apiResponse = await http.get(Uri.parse(unitURL));
-    unitList = UnitList.fromJson(jsonDecode(apiResponse.body));
-  }
+  //void getUnitURL(int dosageUnitID) async {
+  //  String unitURL = "https://vaddb.liamgombart.com/units/$dosageUnitID";
+  //  final http.Response apiResponse = await http.get(Uri.parse(unitURL));
+  //  unitList = UnitList.fromJson(jsonDecode(apiResponse.body));
+  //}
 
-  void getDeliveryMethods(int dosageID) async {
-    String deliveryURL =
-        "https://vaddb.liamgombart.com/delivery?dosage_id=$dosageID";
-    final http.Response apiResponse = await http.get(Uri.parse(deliveryURL));
-    deliveryList = DeliveryList.fromJson(jsonDecode(apiResponse.body));
-  }
+  //void getDeliveryMethods(int dosageID) async {
+  //  String deliveryURL =
+  //      "https://vaddb.liamgombart.com/delivery?dosage_id=$dosageID";
+  //  final http.Response apiResponse = await http.get(Uri.parse(deliveryURL));
+  //  deliveryList = DeliveryList.fromJson(jsonDecode(apiResponse.body));
+  //}
 
-  void getDosageConcentrations(int dosageID) async {
-    String dosageConcentrationURL =
-        "https://vaddb.liamgombart.com/concentrations?dosage_id=$dosageID";
-    final http.Response apiResponse =
-        await http.get(Uri.parse(dosageConcentrationURL));
-    concentrationList =
-        ConcentrationList.fromJson(jsonDecode(apiResponse.body));
-  }
-
-
+  //void getDosageConcentrations(int dosageID) async {
+  //  String dosageConcentrationURL =
+  //      "https://vaddb.liamgombart.com/concentrations?dosage_id=$dosageID";
+  //  final http.Response apiResponse =
+  //      await http.get(Uri.parse(dosageConcentrationURL));
+  //  concentrationList =
+  //      ConcentrationList.fromJson(jsonDecode(apiResponse.body));
+  //}
 
   // Future<MethodList> getMethodsOfDose(int dosageID) async {
   //   MethodList newMethodList;
@@ -210,41 +241,36 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   //   //   // if (concentrationUnit.name != 'n/a' &&
   //   //   //     concentrationUnit.name != 'varies') {
   //   //   //   //concentrationUnit.name = 'mg/kg';
-  //   //   //   // calculatorValueLow = answerValue! * dosageList.entries[i].dose_low;
-  //   //   //   // calculatorValueHigh = answerValue! * dosageList.entries[i].dose_high;
+  //   //   //   // calculatorValueLow = animalWeight! * dosageList.entries[i].dose_low;
+  //   //   //   // calculatorValueHigh = animalWeight! * dosageList.entries[i].dose_high;
   //   //   // }
 
   //   // }
-  //   calculatorValueLow = answerValue! * dosageList.entries.first.dose_low;
-  //   calculatorValueHigh = answerValue! * dosageList.entries.first.dose_high;
+  //   calculatorValueLow = animalWeight! * dosageList.entries.first.dose_low;
+  //   calculatorValueHigh = animalWeight! * dosageList.entries.first.dose_high;
   //   answerString = "{$calculatorValueLow} - {$calculatorValueHigh}";
   //   setState(() {
   //     answerString = "{$calculatorValueLow} - {$calculatorValueHigh}";
   //   });
   // }
 
-  void eachDosageLooper() {
-    String? newValue;
-    answerString = '';
-    for (var i = 0; i < dosageList.entries.length; i++) {
-      if (dosageList.entries[i].animal_id == animalDropValue!.animal_id &&
-          dosageList.entries[i].drug_id == drugDropValue!.drug_id) {
-        calculatorValueLow = answerValue! * dosageList.entries.first.dose_low;
-        calculatorValueHigh = answerValue! * dosageList.entries.first.dose_high;
-        newValue = "{$calculatorValueLow} - {$calculatorValueHigh}";
-        setState(() {
-          answerString = answerString! + newValue!;
-        });
-      }
-    }
-  }
+  //void eachDosageLooper() {
+  //  String? newValue;
+  //  answerString = '';
+  //  for (var i = 0; i < dosageList.entries.length; i++) {
+  //   if (dosageList.entries[i].animal_id == selectedAnimal!.animal_id &&
+  //        dosageList.entries[i].drug_id == selectedDrug!.drug_id) {
+  //      calculatorValueLow = animalWeight! * dosageList.entries.first.dose_low;
+  //      calculatorValueHigh = animalWeight! * dosageList.entries.first.dose_high;
+  //      newValue = "{$calculatorValueLow} - {$calculatorValueHigh}";
+  //      setState(() {
+  //        answerString = answerString! + newValue!;
+  //      });
+  //    }
+  //  }
+  //}
 
-  Animal? animalDropValue;
-  Drug? drugDropValue;
-  double? calculatorValueHigh;
-  double? calculatorValueLow;
-  String? answerString = 'Answer will appear here';
-  int? answerValue;
+
   final TextEditingController calculatorController = TextEditingController();
 
   @override
@@ -270,16 +296,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
                 child: DropdownButton<Animal>(
-                  value: animalDropValue,
+                  value: selectedAnimal,
                   icon: const Icon(Icons.keyboard_arrow_down),
                   elevation: 0,
                   isExpanded: true,
                   hint: Text("Select an Animal"),
                   onChanged: (Animal? value) {
-                    setState(() {
-                      animalDropValue = value;
-                      print(value?.name);
-                    });
+                    animalDropDownHandler(value);
                   },
                   items: animals.map<DropdownMenuItem<Animal>>((Animal value) {
                     return DropdownMenuItem(
@@ -310,16 +333,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
                 child: DropdownButton<Drug>(
-                  value: drugDropValue,
+                  value: selectedDrug,
                   icon: const Icon(Icons.keyboard_arrow_down),
                   elevation: 0,
                   isExpanded: true,
                   hint: Text("Select a Drug"),
                   onChanged: (Drug? value) {
-                    setState(() {
-                      drugDropValue = value;
-                      print(value?.name);
-                    });
+                    drugDropDownHandler(value);
                   },
                   items: drugs
                       .map<DropdownMenuItem<Drug>>((Drug value) {
@@ -341,10 +361,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   border: OutlineInputBorder(),
                   hintText: "Enter the animal's weight in kg"),
               onChanged: (value) {
-                answerValue = int.parse(value);
-                setState(() {
-                  answerValue = int.parse(value);
-                });
+                animalWeightHandler(value);
               },
             ),
           ),
@@ -353,23 +370,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
           child: ElevatedButton(
             onPressed: () async {
-              //eachDosage();
-              eachDosageLooper();
+              calculateDosage();
             },
             child: Text('Calculate Dosage'),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
-          child: ElevatedButton(
-            onPressed: () async {
-                print('yes');
-            },
-            child: Text('DO SOMETHING'),
-          ),
-        ),
-        Flexible(child: Text(answerString!))
-      ]),
+        Flexible(child: Text('$calculatedDosages'))
+    ]),
     );
   }
 }

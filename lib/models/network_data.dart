@@ -26,9 +26,14 @@ class NetworkData {
   Future<dynamic> makeList<T>(String uri, Function(Map<String, dynamic>) constructorFromJson) async {
     var dataAsTarget = <T>[];
     var dataAsJson = await retrieveData(uri);
-    for (var item in dataAsJson) {
-      dataAsTarget.add(constructorFromJson(item));
+    if (dataAsJson is! List<dynamic>) {
+        dataAsTarget.add(constructorFromJson(dataAsJson));
+    } else {
+      for (var item in dataAsJson) {
+        dataAsTarget.add(constructorFromJson(item));
+      }
     }
+
     return dataAsTarget;
   }
 }

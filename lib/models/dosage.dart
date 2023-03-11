@@ -1,4 +1,5 @@
 import 'package:vet_app/assets/constants.dart' as constants;
+import 'package:vet_app/lib.dart';
 
 class Dosage {
   static const String URL = '${constants.TLD}/dosages';
@@ -11,14 +12,22 @@ class Dosage {
   final int? dose_unit_id;
   final String? notes;
 
-  Dosage(
-      {required this.dosage_id,
-      required this.animal_id,
-      required this.drug_id,
-      required this.dose_low,
-      required this.dose_high,
-      required this.dose_unit_id,
-      required this.notes});
+  String? dose_unit_name;
+  List<Concentration>? concentrations;
+  List<Method>? methods;
+
+  Dosage({
+    required this.dosage_id,
+    required this.animal_id,
+    required this.drug_id,
+    required this.dose_low,
+    required this.dose_high,
+    required this.dose_unit_id,
+    required this.notes,
+    required this.dose_unit_name,
+    required this.concentrations,
+    required this.methods,
+  });
 
   factory Dosage.fromJson(Map<String, dynamic> json) {
     var dosage_id;
@@ -58,7 +67,7 @@ class Dosage {
 
     var dose_unit_id;
     try {
-      dose_unit_id = int.parse(json['drug_id']);
+      dose_unit_id = int.parse(json['dose_unit_id']);
     } catch (e) {
       dose_unit_id = null;
     }
@@ -70,7 +79,11 @@ class Dosage {
         dose_low: dose_low,
         dose_high: dose_high,
         dose_unit_id: dose_unit_id,
-        notes: json['notes']);
+        notes: json['notes'],
+        dose_unit_name: null,
+        concentrations: null,
+        methods: null,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -82,6 +95,9 @@ class Dosage {
       'dose_high': dose_high,
       'dose_unit_id': dose_unit_id,
       'notes': notes,
+      'dose_unit_name': dose_unit_name,
+      'concentrations': concentrations,
+      'methods': methods,
     };
   }
 }

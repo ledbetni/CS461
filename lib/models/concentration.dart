@@ -4,22 +4,26 @@ class Concentration {
   static const String URL = '${constants.TLD}/concentrations';
 
   final int concentration_id;
-  final int? value;
+  final double? value;
   final int? unit_id;
   final int? dosage_id;
+
+  String? unit_name;
 
   Concentration(
       {required this.concentration_id,
       required this.value,
       required this.unit_id,
-      required this.dosage_id});
+      required this.dosage_id,
+      required this.unit_name,
+      });
 
   factory Concentration.fromJson(Map<String, dynamic> json) {
     var concentration_id = int.parse(json['concentration_id']);
 
     var value;
     try {
-      value = int.parse(json['value']);
+      value = json['value'].toDouble();
     } catch (e) {
       value = null;
     }
@@ -42,7 +46,9 @@ class Concentration {
         concentration_id: concentration_id,
         value: value,
         unit_id: unit_id,
-        dosage_id: dosage_id);
+        dosage_id: dosage_id,
+        unit_name: null
+    );
   }
   Map<String, dynamic> toJson() {
     return {
@@ -50,6 +56,7 @@ class Concentration {
       'value': value,
       'unit_id': unit_id,
       'dosage_id': dosage_id,
+      'unit_name': unit_name,
     };
   }
 }
