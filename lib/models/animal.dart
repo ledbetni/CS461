@@ -1,7 +1,8 @@
-import 'package:vet_app/lib.dart';
-//model complete
+import 'package:vet_app/assets/constants.dart' as constants;
 
-class Animal {
+class Animal{
+  static const String URL = '${constants.TLD}/animals';
+
   final int animal_id;
   final String name;
   final double temperature_low;
@@ -31,5 +32,18 @@ class Animal {
         heart_rate_high: (json['heart_rate_high']).toDouble(),
         respiratory_rate_low: (json['respiratory_rate_low']).toDouble(),
         respiratory_rate_high: (json['respiratory_rate_high']).toDouble());
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'animal_id': animal_id,
+      'name': name,
+      'temperature_low': temperature_low,
+      'temperature_high': temperature_high,
+      'heart_rate_low': heart_rate_low,
+      'heart_rate_high': heart_rate_high,
+      'respiratory_rate_low': respiratory_rate_low,
+      'respiratory_rate_high': respiratory_rate_high,
+    };
   }
 }

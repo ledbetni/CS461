@@ -5,18 +5,17 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:vet_app/lib.dart';
 import 'animal_details_screen.dart';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 
 class CalculatorScreen extends StatefulWidget {
-  // final DrugList drugList;
-  // final AnimalList animalList;
   const CalculatorScreen({super.key});
 
-  static const String concentrationURL = 'https://vaddb.liamgombart.com/drugs';
-  //static const String deliveryURL = 'https://vaddb.liamgombart.com/drugs';
+  static const String concentrationURL = 'https://vaddb.liamgombart.com/concentrations';
+  static const String deliveryURL = 'https://vaddb.liamgombart.com/delivery';
   static const String dosageURL = 'https://vaddb.liamgombart.com/dosages';
-  //static const String methodURL = 'https://vaddb.liamgombart.com/drugs';
-  //static const String unitURL = 'https://vaddb.liamgombart.com/drugs';
+  static const String methodURL = 'https://vaddb.liamgombart.com/methods';
+  static const String unitURL = 'https://vaddb.liamgombart.com/units';
 
   @override
   State<CalculatorScreen> createState() => _CalculatorScreenState();
@@ -25,11 +24,9 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   List<String> selectedItemValue = [];
 
-  List<Animal> animals = [];
-  var animalList = AnimalList(entries: []);
+  var animals = <Animal>[];
+  var drugs = <Drug> [];
 
-  List<Drug> drugs = [];
-  var drugList = DrugList(entries: []);
 
   List<Concentration> concentrations = [];
   var concentrationList = ConcentrationList(entries: []);
@@ -49,8 +46,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   void initState() {
     super.initState();
-    retrieveAnimalData();
-    retrieveDrugData();
+    getAnimals();
+    getDrugs();
     retrieveDosageData();
   }
 
@@ -60,20 +57,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     super.dispose();
   }
 
-  void retrieveAnimalData() async {
-    final http.Response apiResponse =
-        await http.get(Uri.parse(AnimalScreen.URL));
-    animalList = AnimalList.fromJson(jsonDecode(apiResponse.body));
-    // print('API Response' + apiResponse.body);
-    // print('AnimalList object: ' + animals.toString());
-    setState(() {});
+  Future<http.Response> fetch(String uri) async {
+    final response = await http.get(Uri.parse(uri));
+    return response;
   }
 
-  void retrieveDrugData() async {
-    final http.Response apiResponse = await http.get(Uri.parse(DrugScreen.URL));
-    drugList = DrugList.fromJson(jsonDecode(apiResponse.body));
-    setState(() {});
+  void getAnimals() async {
+    var data = await NetworkData().makeList<Animal>(Animal.URL, Animal.fromJson);
+    setState(() { animals = data; });
   }
+
+  void getDrugs() async {
+    var data = await NetworkData().makeList<Drug>(Drug.URL, Drug.fromJson);
+    setState(() { drugs = data; });
+  }
+
 
   void retrieveConcentrationData() async {
     final http.Response apiResponse =
@@ -156,6 +154,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     concentrationList =
         ConcentrationList.fromJson(jsonDecode(apiResponse.body));
   }
+
+
 
   // Future<MethodList> getMethodsOfDose(int dosageID) async {
   //   MethodList newMethodList;
@@ -278,10 +278,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   onChanged: (Animal? value) {
                     setState(() {
                       animalDropValue = value;
+                      print(value?.name);
                     });
                   },
-                  items: animalList.entries
-                      .map<DropdownMenuItem<Animal>>((Animal value) {
+                  items: animals.map<DropdownMenuItem<Animal>>((Animal value) {
                     return DropdownMenuItem(
                       value: value,
                       child: Text(value.name),
@@ -321,7 +321,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       print(value?.name);
                     });
                   },
-                  items: drugList.entries
+                  items: drugs
                       .map<DropdownMenuItem<Drug>>((Drug value) {
                     return DropdownMenuItem(
                       value: value,
@@ -357,6 +357,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               eachDosageLooper();
             },
             child: Text('Calculate Dosage'),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
+          child: ElevatedButton(
+            onPressed: () async {
+                print('yes');
+            },
+            child: Text('DO SOMETHING'),
           ),
         ),
         Flexible(child: Text(answerString!))

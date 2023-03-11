@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:vet_app/lib.dart';
 
 class DrugDropdownButton extends StatefulWidget {
-  final DrugList drugList;
-  const DrugDropdownButton({super.key, required this.drugList});
+  final List<Drug> drugs;
+  const DrugDropdownButton({super.key, required this.drugs});
 
   @override
   State<DrugDropdownButton> createState() => _DrugDropdownButtonState();
@@ -37,7 +37,7 @@ class _DrugDropdownButtonState extends State<DrugDropdownButton> {
             });
           },
           items:
-              widget.drugList.entries.map<DropdownMenuItem<Drug>>((Drug value) {
+              widget.drugs.map<DropdownMenuItem<Drug>>((Drug value) {
             return DropdownMenuItem(
               value: value,
               child: Text(value.name),

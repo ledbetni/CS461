@@ -10,8 +10,6 @@ import 'package:http/http.dart' as http;
 class DrugScreen extends StatefulWidget {
   const DrugScreen({super.key, required this.title});
 
-  static const String URL = 'https://vaddb.liamgombart.com/drugs';
-
   final String title;
 
   @override
@@ -19,36 +17,26 @@ class DrugScreen extends StatefulWidget {
 }
 
 class _DrugScreenState extends State<DrugScreen> {
-  // final List<Drug> drugs = [
-  //   Drug(1, 'Acepromazine'),
-  //   Drug(2, 'Alfaxalone'),
-  //   Drug(3, 'Atropine'),
-  //   Drug(4, 'Azaperone'),
-  //   Drug(5, 'Buprenorphine')
-  // ];
 
-  List<Drug> drugs = [];
-  var drugList = DrugList(entries: []);
+  var drugs = <Drug>[];
 
   @override
   void initState() {
     super.initState();
-    retrieveDrugData();
+    getDrugs();
   }
 
-  void retrieveDrugData() async {
-    final http.Response apiResponse = await http.get(Uri.parse(DrugScreen.URL));
-    drugList = DrugList.fromJson(jsonDecode(apiResponse.body));
-    setState(() {});
+  void getDrugs() async {
+    var data = await NetworkData().makeList<Drug>(Drug.URL, Drug.fromJson);
+    setState(() { drugs = data; });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: ListView.builder(
-            itemCount: drugList.entries.length,
+            itemCount: drugs.length,
             itemBuilder: (context, index) {
-              return ListTile(title: Text(drugList.entries[index].name));
+              return ListTile(title: Text(drugs[index].name));
             }));
   }
 }

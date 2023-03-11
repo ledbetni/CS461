@@ -1,15 +1,14 @@
 library vet_app;
 
 export 'models/animal.dart';
-export 'models/animal_list.dart';
 export 'models/drug.dart';
-export 'models/drug_list.dart';
 export 'models/concentration.dart';
 export 'models/concentration_list.dart';
 export 'models/dosage.dart';
 export 'models/dosage_list.dart';
 export 'models/method.dart';
 export 'models/method_list.dart';
+export 'models/network_data.dart';
 export 'models/delivery.dart';
 export 'models/delivery_list.dart';
 export 'models/unit.dart';
