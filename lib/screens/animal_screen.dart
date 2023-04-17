@@ -4,44 +4,52 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:io';
 import 'dart:convert';
 import 'package:vet_app/lib.dart';
+import 'animal_details_screen.dart';
+import 'package:http/http.dart' as http;
 
 class AnimalScreen extends StatefulWidget {
   const AnimalScreen({super.key, required this.title});
 
   final String title;
+  static const String URL = 'https://vaddb.liamgombart.com/animals';
 
   @override
   State<AnimalScreen> createState() => _AnimalScreenState();
 }
 
 class _AnimalScreenState extends State<AnimalScreen> {
-  var animals = <Animal>[];
+  List<Animal> animals = [];
+  var animalList = AnimalList(entries: []);
 
   @override
   void initState() {
     super.initState();
-    getAnimals();
+    retrieveAnimalData();
   }
 
-  void getAnimals() async {
-    var data = await NetworkData().makeList<Animal>(Animal.URL, Animal.fromJson);
-    setState(() { animals = data; });
+  void retrieveAnimalData() async {
+    final http.Response apiResponse =
+        await http.get(Uri.parse(AnimalScreen.URL));
+    animalList = AnimalList.fromJson(jsonDecode(apiResponse.body));
+    // print('API Response' + apiResponse.body);
+    // print('AnimalList object: ' + animals.toString());
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-          itemCount: animals.length,
+          itemCount: animalList.entries.length,
           itemBuilder: (context, index) {
             return ListTile(
-                title: Text(animals[index].name),
+                title: Text(animalList.entries[index].name),
                 onTap: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) => AnimalDetailsScreen(
-                              animal: animals[index])));
+                              animal: animalList.entries[index])));
                 });
           }),
     );
