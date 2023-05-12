@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:open_file_plus/open_file_plus.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:io';
+import 'dart:math';
 import 'dart:convert';
 import 'package:vet_app/lib.dart';
 import 'animal_details_screen.dart';
@@ -253,43 +254,32 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             (weightAnswerValue! * dosageDerefList.entries[i].dose_low);
         calculatorValueHigh =
             weightAnswerValue! * dosageDerefList.entries[i].dose_high;
-
         for (var j = 0;
             j < dosageDerefList.entries[i].concentrations.entries.length;
             j++) {
+          calculatorValueLow =
+              (weightAnswerValue! * dosageDerefList.entries[i].dose_low);
+          calculatorValueHigh =
+              weightAnswerValue! * dosageDerefList.entries[i].dose_high;
+
           calculatorValueLow = calculatorValueLow! /
               dosageDerefList.entries[i].concentrations.entries[j].value;
           calculatorValueHigh = calculatorValueHigh! /
               dosageDerefList.entries[i].concentrations.entries[j].value;
+
+          // calculatorValueLow = roundDouble
+          // calculatorValueHigh
+
           // unitString =
           //     dosageDerefList.entries[i].concentrations.entries[j].unit!.name;
 
           unitString = dosageDerefList.entries[i].dose_unit.name;
-          /*NOT WORKING LOOP FOR ALL CONCENTRATIONS */
-
-          // for (var l = 0;
-          //     l < dosageDerefList.entries[i].concentrations.entries.length;
-          //     l++) {
-          //   if (dosageDerefList.entries[i].concentrations.entries.length > 1) {
-          //     concentrationString = concentrationString! +
-          //         dosageDerefList
-          //             .entries[i].concentrations.entries[l].unit.name;
-          //     concentrationValue = concentrationValue +
-          //         dosageDerefList.entries[i].concentrations.entries[l].value;
-          //   } else {
-          //     concentrationString = '';
-          //     concentrationString = dosageDerefList
-          //         .entries[i].concentrations.entries[l].unit.name;
-          //     concentrationValue =
-          //         dosageDerefList.entries[i].concentrations.entries[l].value;
-          //   }
-          // }
 
           /* WORKING CONCENTRATION BUT ONLY ONE */
           concentrationString =
-              dosageDerefList.entries[i].concentrations.entries[0].unit.name;
+              dosageDerefList.entries[i].concentrations.entries[j].unit.name;
           concentrationValue =
-              dosageDerefList.entries[i].concentrations.entries[0].value;
+              dosageDerefList.entries[i].concentrations.entries[j].value;
 
           notesString = dosageDerefList.entries[i].notes;
           if (notesString == null) {
@@ -323,6 +313,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
         setState(() {
           //answerString = answerString! + newAnswerValue!;
+          //doseNum = 0;
           answerString = finalAnswersList.join(" ");
         });
       }
@@ -331,12 +322,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Animal? animalDropValue;
   Drug? drugDropValue;
+  Concentration? concentrationDropValue;
   double? calculatorValueHigh;
   double? calculatorValueLow;
   String? unitString;
   String? concentrationString = '';
   String? notesString;
-  var concentrationValue;
+  num concentrationValue = 0;
   String? doseString;
   int doseNum = 0;
   String? spaceString = "\n\n";
@@ -456,7 +448,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
           ),
         ),
-        Flexible(child: Text(answerString!))
+        Expanded(child: SingleChildScrollView(child: Text(answerString!)))
       ]),
     );
   }
