@@ -307,7 +307,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           doseNum++;
           doseString = "Dose $doseNum: ";
           newAnswerValue =
-              "$doseString$calculatorValueLow $unitString - $calculatorValueHigh $unitString\nConcentration: $concentrationValue $concentrationString\nMethod of Administration: $methodString\nNotes: $notesString $spaceString";
+              "$doseString$calculatorValueLow - $calculatorValueHigh\nConcentration: $concentrationValue $concentrationString\nMethod of Administration: $methodString\nNotes: $notesString $spaceString";
           finalAnswersList.add(newAnswerValue);
         }
 
