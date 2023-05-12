@@ -56,7 +56,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     super.initState();
     retrieveAnimalData();
     retrieveDrugData();
-    retrieveDosageData();
+    //retrieveDosageData();
     retrieveDosageDerefData();
   }
 
@@ -236,17 +236,94 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   //   });
   // }
 
+  /* Animal Weight * Dose(low,high range) / concentration value
+    If */
+
   void eachDosageLooper() {
-    String? newValue;
+    String? newAnswerValue;
+    List<String> finalAnswersList = [];
     answerString = '';
-    for (var i = 0; i < dosageList.entries.length; i++) {
-      if (dosageList.entries[i].animal_id == animalDropValue!.animal_id &&
-          dosageList.entries[i].drug_id == drugDropValue!.drug_id) {
-        calculatorValueLow = answerValue! * dosageList.entries.first.dose_low;
-        calculatorValueHigh = answerValue! * dosageList.entries.first.dose_high;
-        newValue = "{$calculatorValueLow} - {$calculatorValueHigh}";
+    //Iterate through dereferenced list. If animal_id and drug_id match, perform calculation
+    for (var i = 0; i < dosageDerefList.entries.length; i++) {
+      if (dosageDerefList.entries[i].animal.animal_id ==
+              animalDropValue!.animal_id &&
+          dosageDerefList.entries[i].drug.drug_id == drugDropValue!.drug_id) {
+        // Calculation starts here
+        calculatorValueLow =
+            (weightAnswerValue! * dosageDerefList.entries[i].dose_low);
+        calculatorValueHigh =
+            weightAnswerValue! * dosageDerefList.entries[i].dose_high;
+
+        for (var j = 0;
+            j < dosageDerefList.entries[i].concentrations.entries.length;
+            j++) {
+          calculatorValueLow = calculatorValueLow! /
+              dosageDerefList.entries[i].concentrations.entries[j].value;
+          calculatorValueHigh = calculatorValueHigh! /
+              dosageDerefList.entries[i].concentrations.entries[j].value;
+          // unitString =
+          //     dosageDerefList.entries[i].concentrations.entries[j].unit!.name;
+
+          unitString = dosageDerefList.entries[i].dose_unit.name;
+          /*NOT WORKING LOOP FOR ALL CONCENTRATIONS */
+
+          // for (var l = 0;
+          //     l < dosageDerefList.entries[i].concentrations.entries.length;
+          //     l++) {
+          //   if (dosageDerefList.entries[i].concentrations.entries.length > 1) {
+          //     concentrationString = concentrationString! +
+          //         dosageDerefList
+          //             .entries[i].concentrations.entries[l].unit.name;
+          //     concentrationValue = concentrationValue +
+          //         dosageDerefList.entries[i].concentrations.entries[l].value;
+          //   } else {
+          //     concentrationString = '';
+          //     concentrationString = dosageDerefList
+          //         .entries[i].concentrations.entries[l].unit.name;
+          //     concentrationValue =
+          //         dosageDerefList.entries[i].concentrations.entries[l].value;
+          //   }
+          // }
+
+          /* WORKING CONCENTRATION BUT ONLY ONE */
+          concentrationString =
+              dosageDerefList.entries[i].concentrations.entries[0].unit.name;
+          concentrationValue =
+              dosageDerefList.entries[i].concentrations.entries[0].value;
+
+          notesString = dosageDerefList.entries[i].notes;
+          if (notesString == null) {
+            notesString = "No notes for this dosage\n\n";
+          }
+          //notesString = notesString! + "\n\n";
+          for (var k = 0;
+              k < dosageDerefList.entries[i].methods.entries.length;
+              k++) {
+            if (dosageDerefList.entries[i].methods.entries.length > 1) {
+              //methodString = '';
+              methodString = methodString! +
+                  dosageDerefList.entries[i].methods.entries[k].name;
+              methodString = methodString! + " ";
+            } else {
+              methodString = '';
+              methodString = methodString! +
+                  dosageDerefList.entries[i].methods.entries[k].name;
+            }
+
+            // newAnswerValue =
+            //     "$calculatorValueLow $unitString - $calculatorValueHigh $unitString\nConcentration: $concentrationString\nMethod of Administration: $methodString\nNotes: $notesString $spaceString";
+            // finalAnswersList.add(newAnswerValue);
+          }
+          doseNum++;
+          doseString = "Dose $doseNum: ";
+          newAnswerValue =
+              "$doseString$calculatorValueLow $unitString - $calculatorValueHigh $unitString\nConcentration: $concentrationValue $concentrationString\nMethod of Administration: $methodString\nNotes: $notesString $spaceString";
+          finalAnswersList.add(newAnswerValue);
+        }
+
         setState(() {
-          answerString = answerString! + newValue!;
+          //answerString = answerString! + newAnswerValue!;
+          answerString = finalAnswersList.join(" ");
         });
       }
     }
@@ -256,8 +333,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Drug? drugDropValue;
   double? calculatorValueHigh;
   double? calculatorValueLow;
+  String? unitString;
+  String? concentrationString = '';
+  String? notesString;
+  var concentrationValue;
+  String? doseString;
+  int doseNum = 0;
+  String? spaceString = "\n\n";
+  String? methodString = '';
   String? answerString = 'Answer will appear here';
-  int? answerValue;
+  double? weightAnswerValue;
   final TextEditingController calculatorController = TextEditingController();
 
   @override
@@ -265,113 +350,110 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-        Flexible(child: Text("Species")),
-        Flexible(
-          child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: DecoratedBox(
-              decoration: const ShapeDecoration(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                        width: 1.0,
-                        style: BorderStyle.solid,
-                        color: Colors.indigo),
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  )),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
-                child: DropdownButton<Animal>(
-                  value: animalDropValue,
-                  icon: const Icon(Icons.keyboard_arrow_down),
-                  elevation: 0,
-                  isExpanded: true,
-                  hint: Text("Select an Animal"),
-                  onChanged: (Animal? value) {
-                    setState(() {
-                      animalDropValue = value;
-                    });
-                  },
-                  items: animalList.entries
-                      .map<DropdownMenuItem<Animal>>((Animal value) {
-                    return DropdownMenuItem(
-                      value: value,
-                      child: Text(value.name),
-                    );
-                  }).toList(),
-                ),
+        Text("Species"),
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: DecoratedBox(
+            decoration: const ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      width: 1.0,
+                      style: BorderStyle.solid,
+                      color: Colors.indigo),
+                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                )),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
+              child: DropdownButton<Animal>(
+                value: animalDropValue,
+                icon: const Icon(Icons.keyboard_arrow_down),
+                elevation: 0,
+                isExpanded: true,
+                hint: Text("Select an Animal"),
+                onChanged: (Animal? value) {
+                  setState(() {
+                    animalDropValue = value;
+                  });
+                },
+                items: animalList.entries
+                    .map<DropdownMenuItem<Animal>>((Animal value) {
+                  return DropdownMenuItem(
+                    value: value,
+                    child: Text(value.name),
+                  );
+                }).toList(),
               ),
             ),
           ),
         ),
-        Flexible(child: Text("Medication")),
-        Flexible(
-          child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: DecoratedBox(
-              decoration: const ShapeDecoration(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                        width: 1.0,
-                        style: BorderStyle.solid,
-                        color: Colors.indigo),
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  )),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
-                child: DropdownButton<Drug>(
-                  value: drugDropValue,
-                  icon: const Icon(Icons.keyboard_arrow_down),
-                  elevation: 0,
-                  isExpanded: true,
-                  hint: Text("Select a Drug"),
-                  onChanged: (Drug? value) {
-                    setState(() {
-                      drugDropValue = value;
-                      print(value?.name);
-                    });
-                  },
-                  items: drugList.entries
-                      .map<DropdownMenuItem<Drug>>((Drug value) {
-                    return DropdownMenuItem(
-                      value: value,
-                      child: Text(value.name),
-                    );
-                  }).toList(),
-                ),
+        Text("Medication"),
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: DecoratedBox(
+            decoration: const ShapeDecoration(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      width: 1.0,
+                      style: BorderStyle.solid,
+                      color: Colors.indigo),
+                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                )),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 40.0, vertical: 0.0),
+              child: DropdownButton<Drug>(
+                value: drugDropValue,
+                icon: const Icon(Icons.keyboard_arrow_down),
+                elevation: 0,
+                isExpanded: true,
+                hint: Text("Select a Drug"),
+                onChanged: (Drug? value) {
+                  setState(() {
+                    drugDropValue = value;
+                    print(value?.name);
+                  });
+                },
+                items:
+                    drugList.entries.map<DropdownMenuItem<Drug>>((Drug value) {
+                  return DropdownMenuItem(
+                    value: value,
+                    child: Text(value.name),
+                  );
+                }).toList(),
               ),
-            ),
-          ),
-        ),
-        Flexible(
-          child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: TextField(
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "Enter the animal's weight in kg"),
-              onChanged: (value) {
-                answerValue = int.parse(
-                    value); // THIS LINE HAS A BUG WHEN DELETING DATA FROM THE CALCULATOR WEIGHT FIELD. CAUSES EXCEPTION
-                setState(() {
-                  answerValue = int.parse(value);
-                });
-              },
             ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
-          child: ElevatedButton(
-            onPressed: () async {
-              //eachDosage();
-              eachDosageLooper();
-              print(dosageDerefList.entries[0].toString());
+          padding: EdgeInsets.all(8.0),
+          child: TextField(
+            decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: "Enter the animal's weight in kg"),
+            onChanged: (value) {
+              weightAnswerValue = int.parse(value)
+                  .toDouble(); // THIS LINE HAS A BUG WHEN DELETING DATA FROM THE CALCULATOR WEIGHT FIELD. CAUSES EXCEPTION
+              setState(() {
+                weightAnswerValue = int.parse(value).toDouble();
+              });
             },
-            child: Text('Calculate Dosage'),
+          ),
+        ),
+        Flexible(
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 0.0, horizontal: 30.0),
+            child: ElevatedButton(
+              onPressed: () async {
+                //eachDosage();
+                eachDosageLooper();
+                print(dosageDerefList.entries[20].dosage_id);
+              },
+              child: Text('Calculate Dosage'),
+            ),
           ),
         ),
         Flexible(child: Text(answerString!))

@@ -3,7 +3,7 @@ import 'package:vet_app/lib.dart';
 
 class Unit {
   final int unit_id;
-  String name;
+  final String name;
 
   Unit({
     required this.unit_id,
