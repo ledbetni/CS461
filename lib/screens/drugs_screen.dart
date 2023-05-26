@@ -45,10 +45,12 @@ class _DrugScreenState extends State<DrugScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: ListView.builder(
-            itemCount: drugList.entries.length,
-            itemBuilder: (context, index) {
-              return ListTile(title: Text(drugList.entries[index].name));
-            }));
+        body: Scrollbar(
+      child: ListView.builder(
+          itemCount: drugList.entries.length,
+          itemBuilder: (context, index) {
+            return ListTile(title: Text(drugList.entries[index].name));
+          }),
+    ));
   }
 }

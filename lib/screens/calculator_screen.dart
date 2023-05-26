@@ -61,12 +61,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     retrieveDosageDerefData();
   }
 
-  // @override
-  // void dispose() {
-  //   calculatorController.dispose();
-  //   super.dispose();
-  // }
-
   void retrieveAnimalData() async {
     final http.Response apiResponse =
         await http.get(Uri.parse(AnimalScreen.URL));
@@ -90,13 +84,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     setState(() {});
   }
 
-  // void retrieveDeliveryData() async {
-  //   final http.Response apiResponse =
-  //       await http.get(Uri.parse(CalculatorScreen.deliveryURL));
-  //   deliveryList = DeliveryList.fromJson(jsonDecode(apiResponse.body));
-  //   setState(() {});
-  // }
-
   void retrieveDosageData() async {
     final http.Response apiResponse =
         await http.get(Uri.parse(CalculatorScreen.dosageURL));
@@ -110,18 +97,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     dosageDerefList = DosageDerefList.fromJson(jsonDecode(apiResponse.body));
     setState(() {});
   }
-
-  // void retrieveMethodData() async {
-  //   final http.Response apiResponse = await http.get(Uri.parse(DrugScreen.URL));
-  //   methodList = MethodList.fromJson(jsonDecode(apiResponse.body));
-  //   setState(() {});
-  // }
-
-  // void retrieveUnitData() async {
-  //   final http.Response apiResponse = await http.get(Uri.parse(DrugScreen.URL));
-  //   unitList = UnitList.fromJson(jsonDecode(apiResponse.body));
-  //   setState(() {});
-  // }
 
   int getAnimalDrop() {
     Animal getAnimal;
@@ -170,72 +145,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     concentrationList =
         ConcentrationList.fromJson(jsonDecode(apiResponse.body));
   }
-
-  // Future<MethodList> getMethodsOfDose(int dosageID) async {
-  //   MethodList newMethodList;
-  //   String methodURL = "https://vaddb.liamgombart.com/method?dosage_id=6";
-  //   final http.Response apiResponse = await http.get(Uri.parse(methodURL));
-  //   newMethodList = MethodList.fromJson(jsonDecode(apiResponse.body));
-  //   return newMethodList;
-  // }
-
-  // void eachDosage() async {
-  //   getDosageAnimalDrug();
-  //   Unit unitForDosage;
-  //   String unitDosageName;
-  //   int dosageID;
-  //   var methodsOfDoseList = <Method>[];
-  //   Unit concentrationUnit;
-  //   Method newMethod;
-  //   // for (var i = 0; i < dosageList.entries.length; i++) {
-  //   //   Dosage newDosage = dosageList.entries[i];
-  //   //   dosageID = dosageList.entries[i].dosage_id;
-
-  //   //   int newDosageUnitID = newDosage.dose_unit_id;
-  //   //   getUnitURL(newDosageUnitID);
-  //   //   // unitForDosage = unitList.entries.first;
-  //   //   // unitDosageName = unitList.entries.first.name;
-  //   //   // print(unitList.entries.first.name);
-
-  //   //   getDeliveryMethods(dosageID);
-  //   //   // print(deliveryList.entries
-  //   //   //     .first); //FIRST ENTRY IN THE DELIVERY LIST - CONSISTS OF A METHODID AND DOSAGEID
-
-  //   //   // for (var n = 0; n < deliveryList.entries.length; n++) {
-  //   //   //   String methodURL =
-  //   //   //       "https://vaddb.liamgombart.com/methods/${deliveryList.entries[n]}";
-  //   //   //   final http.Response apiResponse = await http.get(Uri.parse(methodURL));
-  //   //   //   newMethod = Method.fromJson(jsonDecode(apiResponse.body));
-  //   //   //   methodsOfDoseList.add(newMethod);
-  //   //   // }
-
-  //   //   // getDosageConcentrations(dosageID);
-  //   //   // int dosageConcentrationUnitID = concentrationList.entries.first.unit_id;
-  //   //   // String unitURL =
-  //   //   //     "https://vaddb.liamgombart.com/units/$dosageConcentrationUnitID";
-  //   //   // final http.Response apiResponse = await http.get(Uri.parse(unitURL));
-  //   //   // concentrationUnit = Unit.fromJson(jsonDecode(apiResponse.body));
-  //   //   // print(concentrationUnit.name);
-  //   //   // calculatorValueLow = dosageList.entries[i].dose_low;
-  //   //   // calculatorValueHigh = dosageList.entries[i].dose_high;
-  //   //   // var dosageUnit = unitList.entries[i].name;
-  //   //   // int dosageUnitInt = int.parse(dosageUnit);
-
-  //   //   // if (concentrationUnit.name != 'n/a' &&
-  //   //   //     concentrationUnit.name != 'varies') {
-  //   //   //   //concentrationUnit.name = 'mg/kg';
-  //   //   //   // calculatorValueLow = answerValue! * dosageList.entries[i].dose_low;
-  //   //   //   // calculatorValueHigh = answerValue! * dosageList.entries[i].dose_high;
-  //   //   // }
-
-  //   // }
-  //   calculatorValueLow = answerValue! * dosageList.entries.first.dose_low;
-  //   calculatorValueHigh = answerValue! * dosageList.entries.first.dose_high;
-  //   answerString = "{$calculatorValueLow} - {$calculatorValueHigh}";
-  //   setState(() {
-  //     answerString = "{$calculatorValueLow} - {$calculatorValueHigh}";
-  //   });
-  // }
 
   /* Animal Weight * Dose(low,high range) / concentration value
     If */
@@ -306,8 +215,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           }
           doseNum++;
           doseString = "Dose $doseNum: ";
+          resultHigh = calculatorValueHigh?.toStringAsFixed(2);
+          resultLow = calculatorValueLow?.toStringAsFixed(2);
           newAnswerValue =
-              "$doseString$calculatorValueLow - $calculatorValueHigh\nConcentration: $concentrationValue $concentrationString\nMethod of Administration: $methodString\nNotes: $notesString $spaceString";
+              "$doseString$resultLow - $resultHigh\nConcentration: $concentrationValue $concentrationString\nMethod of Administration: $methodString\nNotes: $notesString $spaceString";
           finalAnswersList.add(newAnswerValue);
         }
 
@@ -320,6 +231,25 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
   }
 
+  void showError(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: ((context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Please ensure that all fields have been selected'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        }));
+  }
+
   Animal? animalDropValue;
   Drug? drugDropValue;
   Concentration? concentrationDropValue;
@@ -330,6 +260,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String? notesString;
   num concentrationValue = 0;
   String? doseString;
+  var resultHigh;
+  var resultLow;
   int doseNum = 0;
   String? spaceString = "\n\n";
   String? methodString = '';
@@ -426,11 +358,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 border: OutlineInputBorder(),
                 hintText: "Enter the animal's weight in kg"),
             onChanged: (value) {
-              weightAnswerValue = int.parse(value)
-                  .toDouble(); // THIS LINE HAS A BUG WHEN DELETING DATA FROM THE CALCULATOR WEIGHT FIELD. CAUSES EXCEPTION
-              setState(() {
+              if (value.isNotEmpty) {
                 weightAnswerValue = int.parse(value).toDouble();
-              });
+                setState(() {
+                  weightAnswerValue = int.parse(value).toDouble();
+                });
+              } else {
+                setState(() {
+                  weightAnswerValue = 0.0;
+                });
+              }
             },
           ),
         ),
@@ -441,15 +378,31 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: ElevatedButton(
               onPressed: () async {
                 //eachDosage();
-                eachDosageLooper();
-                print(dosageDerefList.entries[20].dosage_id);
+                if (animalDropValue == null || drugDropValue == null) {
+                  showError(context);
+                } else {
+                  eachDosageLooper();
+                  print(dosageDerefList.entries[20].dosage_id);
+                }
               },
               child: Text('Calculate Dosage'),
             ),
           ),
         ),
-        Expanded(child: SingleChildScrollView(child: Text(answerString!)))
+        Expanded(
+            child: Scrollbar(
+          child: SingleChildScrollView(
+              child: Text(style: TextStyle(fontSize: 15), answerString!)),
+        )),
       ]),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (() {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => InfoCalcScreen()));
+        }),
+        tooltip: 'How to use the Calculator?',
+        child: const Icon(Icons.info_outline),
+      ),
     );
   }
 }

@@ -12,12 +12,22 @@ class AnimalDetailsScreen extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(animal.name),
+          title: Text(animal.name + " Vital Signs"),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-              "Temperature = ${animal.temperature_low} - ${animal.temperature_high}\nHeart Rate = ${animal.heart_rate_low} - ${animal.heart_rate_high}\nRespiratory Rate = ${animal.respiratory_rate_low} - ${animal.respiratory_rate_high}\n"),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("\n"),
+            Text(
+                style: TextStyle(fontSize: 20),
+                "Temperature: ${animal.temperature_low} - ${animal.temperature_high}\n"),
+            Text(
+                style: TextStyle(fontSize: 20),
+                "Heart Rate: ${animal.heart_rate_low} - ${animal.heart_rate_high}\n"),
+            Text(
+                style: TextStyle(fontSize: 20),
+                "Respiratory Rate: ${animal.respiratory_rate_low} - ${animal.respiratory_rate_high}\n"),
+          ],
         ));
   }
 }
